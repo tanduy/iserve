@@ -1,0 +1,7 @@
+This is the source for article 
+http://www.trapexit.org/A_fast_web_server_demonstrating_some_undocumented_Erlang_features#Acceptor.2FSocket_process
+
+make
+make install
+
+Browser: http://localhost:8081
