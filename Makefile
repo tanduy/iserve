@@ -7,10 +7,7 @@ clean:
 
 start:
 	echo Starting http demo...
-	erl -smp +K true +P 1000000 \
-		-sname iserve \
-		-setcookie "chocolate chip cookie" \
+	erl -sname iserve \
 		-pa ebin \
-		-s make all \
 		-eval "application:start(iserve)"
 	
