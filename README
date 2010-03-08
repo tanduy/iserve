@@ -1,7 +1,12 @@
-This is the source for article 
+This is the source for article
 http://www.trapexit.org/A_fast_web_server_demonstrating_some_undocumented_Erlang_features
 
 make
 make install
 
-Browser: http://localhost:8081
+iserve:create_table([node()]).
+iserve:add_callback(8081, 'GET', "/", home, main).
+iserve:add_callback(8081, 'GET', "/index.html", index, main).
+
+Browser: 
+http://localhost:8081

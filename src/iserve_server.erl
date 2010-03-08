@@ -5,12 +5,12 @@
 -export([start_link/1, create/2]).
 
 %% gen_server callbacks
--export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2,
-         code_change/3]).
+-export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
--record(state, {listen_socket,
-                port,
-                acceptor}).
+-record(state, {
+    listen_socket,
+    port,
+    acceptor}).
 
 %%--------------------------------------------------------------------
 start_link(Port) when is_integer(Port) ->
@@ -21,24 +21,21 @@ start_link(Port) when is_integer(Port) ->
 create(ServerPid, Pid) ->
     gen_server:cast(ServerPid, {create, Pid}).
 
-
 %% Called by gen_server framework at process startup. Create listening socket
 init(Port) ->
     process_flag(trap_exit, true),
     case gen_tcp:listen(Port,[binary, {packet, http},
-                              {reuseaddr, true},
-                              {active, false},
-                              {backlog, 30}]) of
-	{ok, Listen_socket} ->
-            %%Create first accepting process
-	    Pid = iserve_socket:start_link(self(), Listen_socket, Port),
-	    {ok, #state{listen_socket = Listen_socket,
-                        port = Port,
-			acceptor = Pid}};
-	{error, Reason} ->
-	    {stop, Reason}
-    end.
+        {reuseaddr, true},
+        {active, false},
+        {backlog, 30}]) of
+    {ok, Listen_socket} ->
+        %%Create first accepting process
+        Pid = iserve_socket:start_link(self(), Listen_socket, Port),
+        {ok, #state{listen_socket = Listen_socket, port = Port, acceptor = Pid}};
 
+    {error, Reason} ->
+        {stop, Reason}
+    end.
 
 handle_call(_Request, _From, State) ->
     Reply = ok,
@@ -52,7 +49,6 @@ handle_cast({create, _Pid}, #state{listen_socket = Listen_socket} = State) ->
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
-
 handle_info({'EXIT', Pid, normal}, #state{acceptor=Pid} = State) ->
     {noreply, State};
 
@@ -65,11 +61,9 @@ handle_info({'EXIT', Pid, _Abnormal}, #state{acceptor=Pid} = State) ->
 handle_info(_Info, State) ->
     {noreply, State}.
 
-
 terminate(_Reason, State) ->
     gen_tcp:close(State#state.listen_socket),
     ok.
-
 
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.

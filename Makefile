@@ -7,7 +7,6 @@ clean:
 
 start:
 	echo Starting http demo...
-	erl -sname iserve \
-		-pa ebin \
+	erl -sname server@local -pa ebin \
 		-eval "application:start(iserve)"
 	

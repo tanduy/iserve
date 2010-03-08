@@ -13,7 +13,7 @@
              port,
              peer_addr,
              peer_port
-	     }).
+         }).
 
 -define(server_idle_timeout, 30*1000).
 
@@ -22,21 +22,21 @@ start_link(ListenPid, ListenSocket, ListenPort) ->
 
 init({Listen_pid, Listen_socket, ListenPort}) ->
     case catch gen_tcp:accept(Listen_socket) of
-	{ok, Socket} ->
-            %% Send the cast message to the listener process to create a new acceptor
-	    iserve_server:create(Listen_pid, self()),
-	    io:format("create a new process \n"),
-	    {ok, {Addr, Port}} = inet:peername(Socket),
+    {ok, Socket} ->
+        %% Send the cast message to the listener process to create a new acceptor
+        iserve_server:create(Listen_pid, self()),
+        io:format("create a new process \n"),
+        {ok, {Addr, Port}} = inet:peername(Socket),
             C = #c{sock = Socket,
                    port = ListenPort,
                    peer_addr = Addr,
                    peer_port = Port},
-	    request(C, #req{}); %% Jump to state 'request'
-	Else ->
-	    error_logger:error_report([{application, iserve},
-				       "Accept failed error",
-				       io_lib:format("~p",[Else])]),
-	    exit({error, accept_failed})
+        request(C, #req{}); %% Jump to state 'request'
+    Else ->
+        error_logger:error_report([{application, iserve},
+                       "Accept failed error",
+                       io_lib:format("~p",[Else])]),
+        exit({error, accept_failed})
     end.
 
 request(C, Req) ->
@@ -46,11 +46,11 @@ request(C, Req) ->
                                method = Method,
                                uri = Path}, []);
         {error, {http_error, "\r\n"}} ->
-	    request(C, Req);
-	{error, {http_error, "\n"}} ->
             request(C, Req);
-	_Other ->
-	    exit(normal)
+        {error, {http_error, "\n"}} ->
+            request(C, Req);
+        _Other ->
+            exit(normal)
     end.
 
 headers(C, Req, H) ->
@@ -64,16 +64,16 @@ headers(C, Req, H) ->
         {ok, {http_header, _, Header, _, Val}} ->
             headers(C, Req, [{Header, Val}|H]);
         {error, {http_error, "\r\n"}} ->
-	    headers(C, Req, H);
-	{error, {http_error, "\n"}} ->
+            headers(C, Req, H);
+        {error, {http_error, "\n"}} ->
             headers(C, Req, H);
         {ok, http_eoh} ->
             body(C, Req#req{headers = lists:reverse(H)});
-	_Other ->
-	    exit(normal)
+        _Other ->
+            exit(normal)
     end.
 
-%% Shall we keep the connection alive? 
+%% Shall we keep the connection alive?
 %% Default case for HTTP/1.1 is yes, default for HTTP/1.0 is no.
 %% Exercise for the reader - finish this so it does case insensitivity properly !
 keep_alive({1,1}, "close")      -> close;
@@ -176,7 +176,7 @@ call_mfa(F, A, C, Req) ->
         {error, not_found} ->
             send(C, ?not_found_404)
     end.
-       
+
 add_content_length(Headers, Body) ->
     case lists:keysearch('Content-Length', 1, Headers) of
         {value, _} ->
@@ -192,7 +192,7 @@ enc_headers([{Tag, Val}|T]) when is_list(Tag) ->
     [Tag, ": ", enc_header_val(Val), "\r\n"|enc_headers(T)];
 enc_headers([]) ->
     [].
-    
+
 enc_header_val(Val) when is_atom(Val) ->
     atom_to_list(Val);
 enc_header_val(Val) when is_integer(Val) ->
@@ -211,7 +211,7 @@ split_at_q_mark([H|T], Acc) ->
 split_at_q_mark([], Acc) ->
     {lists:reverse(Acc), []}.
 
-  
+
 send(#c{sock = Sock}, Data) ->
     case gen_tcp:send(Sock, Data) of
         ok ->
@@ -219,5 +219,3 @@ send(#c{sock = Sock}, Data) ->
         _ ->
             exit(normal)
     end.
-
-
